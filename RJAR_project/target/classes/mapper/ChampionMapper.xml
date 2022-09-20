@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rjar.www.dao.IchampionDao">
+
+   <select id="getChampionList" resultType="Champion">
+      SELECT /*+INDEX_DESC(STATS_SKILL_DATA STATS_SKILL_PK)*/ CHAMPIONNAME, CHAMPIONID, CHAMPION_KR_NAME
+      FROM STATS_SKILL_DATA
+      ORDER BY CHAMPION_KR_NAME
+   </select>
+   
+   <select id="getTierList" resultType="Champion">
+      SELECT /*+INDEX_DESC(${tier}_DETAIL ${tier}_DETAIL_PK)*/ CHAMPIONNAME, CHAMPIONID, CHAMPION_KR_NAME, CHAMPTIER, WINRATE AS WINRATE1, PICKRATE,
+      BANRATE AS BANRATE1, COUNTER1, COUNTER2, COUNTER3
+      FROM ${tier}_DETAIL
+      WHERE LANE = #{lane}
+      ORDER BY CHAMPTIER, WINRATE1
+   </select>
+
+   <select id="getLaneChamp" resultType="Champion">
+      SELECT /*+INDEX_DESC(${tier}_DETAIL ${tier}_DETAIL_PK)*/ CHAMPIONNAME, CHAMPIONID, CHAMPION_KR_NAME
+      FROM ${tier}_DETAIL
+      WHERE LANE = #{lane}
+      ORDER BY CHAMPION_KR_NAME
+   </select>
+   
+   <select id="getRotaion" resultType="Champion">
+      SELECT /*+INDEX_DESC(STATS_SKILL_DATA STATS_SKILL_PK)*/ CHAMPIONNAME, CHAMPIONID, CHAMPION_KR_NAME
+      FROM STATS_SKILL_DATA
+      WHERE CHAMPIONID IN(#{championId1},#{championId2},#{championId3},#{championId4},#{championId5},#{championId6},
+      #{championId7},#{championId8},#{championId9},#{championId10},#{championId11},#{championId12},#{championId13},#{championId14},
+      #{championId15},#{championId16})
+      ORDER BY CHAMPION_KR_NAME
+   </select>
+   
+   <select id="getSelectChamp" resultType="Champion">
+      SELECT /*+INDEX_DESC(STATS_SKILL_DATA STATS_SKILL_PK)*/ CHAMPIONNAME, CHAMPION_KR_NAME
+      FROM STATS_SKILL_DATA
+      WHERE CHAMPION_KR_NAME LIKE '%'||#{text}||'%' OR CHAMPIONNAME LIKE '%'||#{text}||'%'
+      ORDER BY CHAMPION_KR_NAME
+   </select>
+   
+   <select id="getChampionName1" resultType="ChampionDetail">
+      SELECT /*+INDEX_DESC(${tier}_DETAIL ${tier}_DETAIL_PK)*/ LANE, CHAMPIONNAME, CHAMPION_KR_NAME FROM ${tier}_DETAIL
+      WHERE CHAMPIONID = ${championId}
+      ORDER BY PICKRATE DESC
+   </select>
+   
+   <select id="getChampionName2" resultType="ChampionDetail">
+      SELECT /*+ FULL(${tier}) */ LANE, CHAMPIONID, CHAMPIONNAME, CHAMPION_KR_NAME FROM ${tier}_DETAIL
+      WHERE CHAMPION_KR_NAME = #{championName} OR CHAMPIONNAME = #{championName}
+      ORDER BY PICKRATE DESC
+   </select>
+   
+   <select id="getChampionRunes" resultType="ChampionDetail">
+      SELECT /*+ FULL(${tier}) */ MAIN_RUNE, MAIN_UNDER1, MAIN_UNDER2, MAIN_UNDER3, 
+      MAIN_UNDER4, SUB_RUNE, SUB_UNDER1, SUB_UNDER2, STATPERKS
+      FROM ${tier}
+      WHERE CHAMPIONNAME = #{championName} AND TEAMPOSITION = #{lane} AND WIN = 'True'
+      GROUP BY MAIN_RUNE, MAIN_UNDER1, MAIN_UNDER2, MAIN_UNDER3, 
+      MAIN_UNDER4, SUB_RUNE, SUB_UNDER1, SUB_UNDER2, STATPERKS
+      ORDER BY COUNT(MAIN_RUNE) DESC, COUNT(MAIN_UNDER1) DESC, COUNT(MAIN_UNDER2) DESC, COUNT(MAIN_UNDER3) DESC, 
+      COUNT(MAIN_UNDER4) DESC, COUNT(SUB_RUNE) DESC, COUNT(SUB_UNDER1) DESC, COUNT(SUB_UNDER2) DESC, COUNT(STATPERKS) DESC
+   </select>
+   
+   <select id="rune_pickWin" resultType="ChampionDetail">
+      SELECT B.RUNE_PICK AS RUNE_PICK, ROUND(A.RUNE_WIN/B.RUNE_PICK, 4)*100 AS RUNE_WINRATE  
+      FROM
+      (SELECT CHAMPIONNAME, COUNT(*) AS RUNE_WIN FROM ${tier}
+      WHERE MAIN_RUNE = ${main_rune} AND MAIN_UNDER1=${main_under1} AND MAIN_UNDER2=${main_under2} AND MAIN_UNDER3=${main_under3} 
+      AND MAIN_UNDER4=${main_under4} AND SUB_RUNE =${sub_rune} AND SUB_UNDER1=${sub_under1} AND SUB_UNDER2=${sub_under2} 
+      AND STATPERKS= #{statperks3} AND CHAMPIONNAME = #{championName} AND TEAMPOSITION = #{lane} AND WIN = 'True'
+      GROUP BY CHAMPIONNAME) A
+      RIGHT JOIN
+      (SELECT CHAMPIONNAME, COUNT(*) AS RUNE_PICK FROM ${tier}
+      WHERE MAIN_RUNE = ${main_rune} AND MAIN_UNDER1=${main_under1} AND MAIN_UNDER2=${main_under2} AND MAIN_UNDER3=${main_under3} 
+      AND MAIN_UNDER4=${main_under4} AND SUB_RUNE =${sub_rune} AND SUB_UNDER1=${sub_under1} AND SUB_UNDER2=${sub_under2} 
+      AND STATPERKS= #{statperks3} AND CHAMPIONNAME = #{championName} AND TEAMPOSITION = #{lane}
+      GROUP BY CHAMPIONNAME) B
+      ON A.CHAMPIONNAME = B.CHAMPIONNAME
+   </select>
+   
+   <select id="getRunePng" resultType="ChampionDetail">
+   ${query}
+   </select>
+   
+   <select id="getCounterInfo" resultType = "Champion">
+      SELECT COUNTER1, COUNTER2, COUNTER3, COUNTER4, COUNTER5, COUNTER6,
+      COUNTER7, COUNTER8, COUNTER9, COUNTER10 FROM ${tier}_DETAIL
+      WHERE CHAMPIONNAME = #{championName} AND LANE = #{lane}
+   </select>
+   
+   <!-- 킬관여율+ 총 딜량의 평균 + kda -->
+   <select id="getRemainder" resultType = "Champion">
+      SELECT round(sum(A.ka)/sum(A.d),2) as kda1, round(sum(B.ka)/sum(B.d),2) as kda2
+      , ROUND(AVG(A.TOTALDAMAGEDEALTTOCHAMPIONS)) AS DAMAGEDEALT1
+      , ROUND(AVG(B.TOTALDAMAGEDEALTTOCHAMPIONS)) AS DAMAGEDEALT2
+      , ROUND(AVG(A.KILLPARTICIPATION)/(AVG(A.KILLPARTICIPATION)
+      +AVG(B.KILLPARTICIPATION))*100, 2) AS KILLPARTICIPATION1
+      ,ROUND(AVG(B.KILLPARTICIPATION)/(AVG(A.KILLPARTICIPATION)
+      +AVG(B.KILLPARTICIPATION))*100, 2) AS KILLPARTICIPATION2
+      FROM
+      (SELECT GAMEID, KILLPARTICIPATION, TOTALDAMAGEDEALTTOCHAMPIONS, kills+assists as ka, deaths as d FROM BRONZE
+      WHERE CHAMPIONNAME = #{championName} AND TEAMPOSITION = #{lane}) A
+      INNER JOIN
+      (SELECT GAMEID, KILLPARTICIPATION, TOTALDAMAGEDEALTTOCHAMPIONS, kills+assists as ka, deaths as d FROM BRONZE
+      WHERE CHAMPIONNAME = #{counter} AND TEAMPOSITION = #{lane}) B
+      ON A.GAMEID = B.GAMEID
+   </select>
+   
+   <select id="getvsWinRate" resultType="Champion">
+      SELECT ROUND(COUNT(E.WIN)/COUNT(F.GAMEID), 4)*100 AS VSWINRATE, COUNT(F.GAMEID) AS GAMECOUNT
+      FROM
+      (SELECT A.WIN FROM
+      (SELECT GAMEID AS WIN FROM ${tier}
+      WHERE CHAMPIONNAME = #{championName} AND TEAMPOSITION = #{lane} AND WIN = 'True') A
+      INNER JOIN
+      (SELECT GAMEID FROM ${tier}
+      WHERE CHAMPIONNAME = #{counter} AND TEAMPOSITION = #{lane}) B
+      ON A.WIN = B.GAMEID) E
+      RIGHT JOIN
+      (SELECT C.GAMEID FROM
+      (SELECT GAMEID FROM ${tier}
+      WHERE CHAMPIONNAME = #{championName} AND TEAMPOSITION = #{lane}) C
+      INNER JOIN
+      (SELECT GAMEID FROM ${tier}
+      WHERE CHAMPIONNAME = #{counter} AND TEAMPOSITION = #{lane}) D
+      ON C.GAMEID = D.GAMEID) F
+      ON E.WIN = F.GAMEID
+   </select>
+   
+   <!-- 카운터 포지션승률+밴률 -->
+   <select id="getBanWinRate" resultType="Champion">
+      SELECT A.BANRATE AS BANRATE1, A.WINRATE AS WINRATE1, B.BANRATE AS BANRATE2, B.WINRATE AS WINRATE2 FROM
+      (SELECT LANE, BANRATE, WINRATE FROM ${tier}_DETAIL WHERE CHAMPIONNAME = #{championName} AND LANE = #{lane}) A
+      INNER JOIN
+      (SELECT LANE, BANRATE, WINRATE FROM ${tier}_DETAIL WHERE CHAMPIONNAME = #{counter} AND LANE = #{lane}) B
+      ON A.LANE = B.LANE
+   </select>
+   
+   <select id="getCounterRunes" resultType="ChampionDetail">
+      SELECT MAIN_RUNE, MAIN_UNDER1, MAIN_UNDER2, MAIN_UNDER3, 
+      MAIN_UNDER4, SUB_RUNE, SUB_UNDER1, SUB_UNDER2, STATPERKS
+      FROM ${tier}
+      WHERE CHAMPIONNAME = #{championName} AND TEAMPOSITION = #{lane} AND WIN = 'True' 
+      AND GAMEID IN(SELECT GAMEID FROM ${tier} WHERE CHAMPIONNAME = #{counter} AND TEAMPOSITION = #{lane}) 
+      GROUP BY MAIN_RUNE, MAIN_UNDER1, MAIN_UNDER2, MAIN_UNDER3, 
+      MAIN_UNDER4, SUB_RUNE, SUB_UNDER1, SUB_UNDER2, STATPERKS
+      ORDER BY COUNT(MAIN_RUNE) DESC, COUNT(MAIN_UNDER1) DESC, COUNT(MAIN_UNDER2) DESC, COUNT(MAIN_UNDER3) DESC, 
+      COUNT(MAIN_UNDER4) DESC, COUNT(SUB_RUNE) DESC, COUNT(SUB_UNDER1) DESC, COUNT(SUB_UNDER2) DESC, COUNT(STATPERKS) DESC
+   </select>      
+   <select id="getSpell" resultType="ChampionDetail">
+      SELECT * FROM BRONZE_PLUS
+      WHERE CHAMPIONNAME=#{championName} AND LANE=#{lane}
+      ORDER BY SPELL_CNT DESC
+   </select>
+   
+   <select id="getSpellPlus" resultType="ChampionDetail">
+      SELECT * FROM BRONZE_PLUS
+      WHERE CHAMPIONNAME=#{championName} AND LANE=#{lane}
+      ORDER BY SPELL_CNT DESC
+   </select>
+   
+   <select id="getStart_items" resultType="ChampionDetail">
+      SELECT *
+      FROM(SELECT * FROM START_ITEM
+           WHERE CHAMPIONNAME=#{championName} AND TEAMPOSITION=#{lane}
+           ORDER BY START_CNT DESC) A
+      INNER JOIN(SELECT * FROM CHAMP_IMAGE) B
+      ON A.CHAMPIONID=B.CHAMPIONID
+      WHERE <![CDATA[ROWNUM<=2]]>
+   </select>
+   
+   <insert id="replyInsert" parameterType="Reply">
+      INSERT INTO REPLY_TABLE (CHAMPIONID, R_NUM, R_NICK , R_CONTENTS, R_DATE)
+      VALUES(${championId}, SEQ_REPLY.NEXTVAL, #{r_nick}, #{r_contents}, default)
+   </insert>
+   
+   <select id="getReplyList" resultType="Reply">
+      SELECT * FROM REPLY_TABLE 
+      WHERE CHAMPIONID= #{championId}
+      ORDER BY R_DATE
+   </select>
+   
+   <delete id="deleteReply" parameterType="Reply">
+      DELETE FROM REPLY_TABLE
+      WHERE CHAMPIONID= ${championId} AND R_NUM = ${r_num}
+   </delete>
+   
+   <select id="correctReply" resultType="Reply">
+      SELECT R_CONTENTS, R_NUM FROM REPLY_TABLE
+      WHERE CHAMPIONID= ${championId} AND R_NUM = ${r_num}
+   </select>
+   
+   <update id="upDateReply" parameterType="Reply">
+      UPDATE REPLY_TABLE
+      SET 
+      R_CONTENTS = #{r_contents}
+      WHERE CHAMPIONID= ${championId} AND R_NUM = ${r_num}
+   </update>
+   
+   <select resultType="ChampionDetail" id="getSkill_build">
+      SELECT *
+      FROM (SELECT * FROM SKILL_BUILD
+           WHERE CHAMPIONNAME=#{championName} AND TEAMPOSITION=#{lane}
+           ORDER BY SKILL_PICK DESC)
+      WHERE ROWNUM=1
+   </select>
+   
+   <select resultType="ChampionDetail" id="getBoots">
+      SELECT *
+      FROM (SELECT *
+            FROM boots
+            WHERE CHAMPIONNAME=#{championName} AND TEAMPOSITION=#{lane}
+            ORDER BY BOOTS_CNT DESC)
+      WHERE <![CDATA[ROWNUM<=2]]>
+   </select>
+   
+   <select resultType="ChampionDetail" id="getBoots_Plus">
+      SELECT *
+      FROM (SELECT *
+            FROM ${tier}_PLUS_BOOTS
+            WHERE CHAMPIONNAME=#{championName} AND TEAMPOSITION=#{lane}
+            ORDER BY BOOTS_CNT DESC)
+      WHERE <![CDATA[ROWNUM<=2]]>
+   </select>
+   
+   <select resultType="ChampionDetail" id="getItem_build">
+      SELECT CHAMPIONNAME, CHAMPIONID, TEAMPOSITION, ITEM1, ITEM2, ITEM3, ITEM_TOTAL, ITEM_CNT, ITEM_WIN, ITEM_WINRATE, ITEM_PICK
+      FROM (SELECT * FROM ${tier}_BUILD3
+           WHERE CHAMPIONNAME=#{championName} AND TEAMPOSITION=#{lane} AND ITEM3!=0
+           ORDER BY ITEM_CNT DESC)
+      WHERE <![CDATA[ROWNUM<=4]]>
+   </select>
+
+	<select resultType="ChampionDetail" id="getChampionItem">
+		SELECT *
+		FROM(SELECT CHAMPIONNAME, TEAMPOSITION, ITEM1, ITEM2, ITEM3 , ITEM_WIN, ITEM_CNT,
+		ITEM_TOTAL, ITEM_WINRATE, ITEM_PICK
+		FROM GOLD_BUILD3
+		GROUP BY CHAMPIONNAME, TEAMPOSITION, ITEM1, ITEM2, ITEM3, ITEM_WIN,
+		ITEM_CNT, ITEM_TOTAL, ITEM_WINRATE, ITEM_PICK
+		HAVING ITEM1!=0 AND ITEM2!=0 AND ITEM3!=0 AND CHAMPIONNAME=#{championName}
+		AND TEAMPOSITION=#{lane}
+		ORDER BY ITEM_CNT DESC)
+		WHERE <![CDATA[ROWNUM<=10]]>
+	</select>
+   
+    <select resultType="ChampionDetail" id="getChampionBoots">
+   SELECT *
+   FROM (SELECT * 
+         FROM GOLD_PLUS_BOOTS
+         WHERE CHAMPIONNAME=#{championName} AND TEAMPOSITION=#{lane} AND BOOTS!=0
+         ORDER BY BOOTS_CNT DESC)
+   WHERE <![CDATA[ROWNUM<=5]]>
+   </select>
+</mapper>

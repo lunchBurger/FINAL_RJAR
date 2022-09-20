@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rjar.www.dao.IMultiSearchDao">
+
+	<select id="checkSummonerName" parameterType="String" resultType="int">
+		select count(*) from multiSearch
+		where summonerName = '${summonerName}'
+	</select>
+	
+	<insert id="insertMultiSearchTable" parameterType="HashMap">
+		insert into multiSearch
+		values('${gameId}', ${participantId}, ${endGameDate},
+		'${summonerName}', '${tier}', '${rank}', '${lp}', '${championName}',
+		'${lanes}', ${kills}, ${deaths}, ${assists})
+	</insert>
+
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- summoner search 관련 mapper -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rjar.www.dao.ISummonerSearchDao">
+	<select id="SearchGame" resultType="Map">
+		SELECT * FROM SUMSEARCH WHERE SS_GAMEID = #{ss_gameId}
+	</select>
+	<insert id="insertGameData" parameterType="Map">
+		INSERT INTO SUMSEARCH
+		VALUES(#{ss_gameid},#{ss_participantid},#{ss_championid},#{ss_championname},#{ss_champlevel},
+		#{ss_summonername},
+		#{ss_win},#{ss_spell1},#{ss_spell2},#{ss_mainrune},#{ss_subrune},#{ss_kills},#{ss_assists},
+		#{ss_deaths},#{ss_killparticipation},#{ss_damagedealt},#{ss_damagetaken},#{ss_visionwardbuy},
+		#{ss_wardkilled},#{ss_wardplaced},
+		#{ss_cs},#{ss_items},#{ss_earngold},#{ss_dragon},#{ss_baron},#{ss_tower},#{ss_gameduration},
+		#{ss_endgamedate})
+	</insert>
+
+
+</mapper>

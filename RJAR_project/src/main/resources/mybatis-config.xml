@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Mybatis 공통 환경 설정 -->
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<typeAliases>
+		<typeAlias alias="Member" type="com.rjar.www.bean.Member"/>
+		<typeAlias alias="Champion" type="com.rjar.www.bean.Champion"/>
+		<typeAlias alias="ChampionDetail" type="com.rjar.www.bean.ChampionDetail"/>
+		<typeAlias alias="Reply" type="com.rjar.www.bean.Reply"/>
+		<typeAlias alias="GameDetailShowInfo" type="com.rjar.www.bean.summonersearch.GameDetailShowInfo"/>
+		<typeAlias alias="MultiSearch" type="com.rjar.www.bean.summonersearch.MultiSearchBean"/>
+	</typeAliases>
+</configuration>
+<!-- commit -->
+
+<!-- Mybatis 사용법
+1. parameterType은 생략 가능
+2. parameterType이 bean(DTO)인 경우 #{필드명}
+3. parameterType이 변수인 경우 #{변수명}
+4. parameterType이 Map<key, value>인 경우 #{key}
+5. select를 제외한 나머지 태그는 resultType 명시 금지
+6. resultType이 bean 이거나 또는 변수일 때 일치되는 컬럼(또는 테이블명)에 저장한다.
+7. #{} : 문자열인 경우 내부적으로 따옴표('')가 추가됨
+8. ${} : 문자열인 경우 내부적으로 그대로 처리(ex: 컬럼럼명 전달시) -->

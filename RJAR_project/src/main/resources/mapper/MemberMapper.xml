@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- IMemberDao 전용 Mapper: 회원관련 sql -->
+<!-- Mybatis 사용법 1. parameterType은 생략 가능, 명시할 경우 1개 Type만 가능 2. parameterType이 
+	bean(DTO,Entity)인 경우 #{필드명} 3. parameterType이 변수인 경우 #{변수명} 4. parameterType이 
+	Map<key,value>인 경우 #{key} 5. select제외한 나머지 태그는 resultType 사용불가 6. resultType이 
+	bean일때 컬럼명과 필드명이 일치하는 것끼리 매핑된다. 7. resultType이 Map일때 컬럼명이 key(대문자)로 설정된다. 
+	8. #{} : 문자열인 경우 따옴표('') 추가됨 9. ${} : 문자열인 경우 따옴표('') 추가없음(예, 컬럼명 전달시) -->
+<!-- <mapper namespace="memberMapper"> <select id="access" resultType="boolean"> 
+	SELECT COUNT(*) FROM MEMBER WHERE M_ID=#{m_id} AND M_PWD=#{m_pwd} </select> 
+	</mapper> -->
+
+<mapper namespace="com.rjar.www.dao.IMemberDao">
+
+<!-- 	id를 함수명과 같게 할 것 -->
+<!-- 	<select id="showMember" resultType="Member"> -->
+<!-- 		select * from member -->
+<!-- 	</select> -->
+	
+	<select id="checkId" resultType="Member">
+		select * from member
+		where m_id = #{m_id}
+	</select>
+	
+	<select id="checkNick" resultType="Member">
+		select * from member
+		where m_nick = #{m_nick}
+	</select>
+
+	<insert id="insertMember">
+		insert into member
+		values(m_num_seq.NEXTVAL, #{m_id}, #{m_nick}, #{m_pw},
+		#{m_name}, #{m_tel}, #{m_que}, #{m_ans}, #{m_phone})
+	</insert>
+	
+	<select id="getSecurityPw" resultType="Member">
+		SELECT M_PW, M_NICK FROM M WHERE M_ID=#{m_id}
+	</select>
+	
+	<select id="checkName" resultType="Member">
+		select m_id, m_tel, m_phone from member where m_name = #{m_name}
+	</select>
+	
+	<select id="checkPw" resultType="Member">
+		select m_id, m_pw, m_que, m_ans from member where m_id = #{m_id}
+	</select>
+	
+	<update id="changePw">
+		update member set
+		m_pw = #{m_pw} where m_id = #{m_id}
+	</update>
+	
+	<select id="checkUser" resultType="String">
+		select m_id from member where m_name = #{m_name}
+	</select>
+	
+	<select id="getMyPageInfo" resultType="Member">
+	    select * from member where m_nick = #{m_nick}
+	</select>
+	
+	<update id="nickModify">
+	    update member set
+	    m_nick = #{m_MNick} where m_nick = #{m_nick}
+	</update>
+	<delete id="deleteMember">
+	    delete from member where m_nick = #{m_nick}
+	</delete>
+	<select id="getReplyList" resultType="Reply">
+	    select * from reply_table where r_nick = #{r_nick}
+	</select>
+	
+	
+	
+	
+</mapper>
+
