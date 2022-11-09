@@ -1,0 +1,41 @@
+import java.util.*;
+
+public class Main {
+
+	public static void main(String[] args) {
+		
+		String [] cities = {"Jeju", "Pangyo", "Seoul", "Jeju", "Pangyo", "Seoul", "Jeju", "Pangyo", "seoul"};
+		int cacheSize = 3;
+		ArrayList<String> list = new ArrayList<>();
+		int answer = 0;
+		
+		
+		if(cacheSize != 0 && cacheSize<cities.length) {
+			for(int i = 0; i<cities.length; i++) {
+				// 소문자로 변경
+				String temp = cities[i].toLowerCase();
+				
+				// temp 값이 포함되면 기존값 제거 후 새롭게 추가, 그렇지 않으면 맨 앞 제거 후 추가
+				if(list.contains(temp)) {
+					list.remove(String.valueOf(temp));
+					list.add(temp);
+					answer++;
+				}else {
+					answer += 5;
+					if(list.size()==cacheSize) {
+						list.remove(0);
+						list.add(temp);
+					}else {
+						list.add(temp);
+					}
+					
+				}
+			
+			}		
+		}else {
+			answer = cities.length*5;
+		}
+		
+	}
+
+}
